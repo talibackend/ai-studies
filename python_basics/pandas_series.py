@@ -27,3 +27,14 @@ print(ser.groupby(level=0).max())
 print(ser.groupby(level=0).min())
 print(ser.groupby(level=0).std())
 print(ser.groupby(level=0).sum())
+
+
+index = [('a', 'A'), ('a', 'B'), ('b', 'A'), ('b', 'B'), ('c', 'A'), ('c', 'B')]
+data = [1, 2, 3, 4, 5, 6]
+index = pd.MultiIndex.from_tuples(index)
+ser = pd.Series(data, index=index)
+print(ser)
+print(ser['a']['A'])
+print(ser.loc['a', 'A'])
+
+# ser.to_csv('ser.csv')
