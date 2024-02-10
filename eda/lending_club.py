@@ -15,7 +15,7 @@ print(df)
 # print(df.columns)
 # print(df.info())
 
-df.fillna(0, inplace=True)
+# df.fillna(0, inplace=True)
 
 print(df.info())
 
@@ -43,18 +43,36 @@ print(sliced_data)
 # plot.legend()
 # plot.show()
 
-plot.figure(figsize=(10, 5))
-sns.set_style('dark')
-ax = sns.countplot(x="loan_status", data=df)
-ax.set_title("Loan Status", fontsize=14)
-ax.set_xlabel("Loan Status", fontsize=14)
-ax.set_ylabel("Loan Application Count")
+# plot.figure(figsize=(10, 5))
+# sns.set_style('dark')
+# ax = sns.countplot(x="loan_status", data=df)
+# ax.set_title("Loan Status", fontsize=14)
+# ax.set_xlabel("Loan Status", fontsize=14)
+# ax.set_ylabel("Loan Application Count")
 
-s = df['loan_status'].value_counts()
-total = s.sum()
+# s = df['loan_status'].value_counts()
+# total = s.sum()
 
-for i, j in s.reset_index().iterrows():
-    txt = str(j['count']) + " of " + str(total) + " / " + str(round(j['count']/total*100, 1)) + '%'
-    ax.text(i - 0.25, j.loan_status + 200, txt, color="k")
+# for i, j in s.reset_index().iterrows():
+#     txt = str(j['count']) + " of " + str(total) + " / " + str(round(j['count']/total*100, 1)) + '%'
+#     ax.text(i - 0.25, j.loan_status + 200, txt, color="k")
 
-plot.show()
+# plot.show()
+
+# f, ax = plot.subplots(figsize=(10, 5))
+# sns.heatmap(df.corr())
+# plot.show()
+
+total_count = df.shape[0]
+print(total_count)
+sum_object = df.isna().sum()
+
+percent_object = {}
+
+for i in sum_object.keys():
+    count = sum_object[i]
+    percent_object[i] = round((count / total_count) * 100, 2)
+
+percent_df = pd.DataFrame.from_dict(percent_object, orient="index", columns=["Percentage of null values"])
+print(percent_df)
+    
