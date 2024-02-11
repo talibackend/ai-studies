@@ -63,16 +63,33 @@ print(sliced_data)
 # sns.heatmap(df.corr())
 # plot.show()
 
-total_count = df.shape[0]
-print(total_count)
-sum_object = df.isna().sum()
+# total_count = df.shape[0]
+# print(total_count)
+# sum_object = df.isna().sum()
 
-percent_object = {}
+# percent_object = {}
 
-for i in sum_object.keys():
-    count = sum_object[i]
-    percent_object[i] = round((count / total_count) * 100, 2)
+# for i in sum_object.keys():
+#     count = sum_object[i]
+#     percent_object[i] = round((count / total_count) * 100, 2)
 
-percent_df = pd.DataFrame.from_dict(percent_object, orient="index", columns=["Percentage of null values"])
-print(percent_df)
+# percent_df = pd.DataFrame.from_dict(percent_object, orient="index", columns=["Percentage of null values"])
+# print(percent_df)
+
+# string_columns = df.columns[df.dtypes == 'object']
+# print(string_columns)
+
+# for i in string_columns:
+#     print(df[i].value_counts())
+#     print('---------------------------')
     
+
+# print(df.info())
+
+# ct = pd.crosstab(df.int_rate, df.loan_amnt)
+# print(ct)
+
+# plot.figure(figsize=(8, 5))
+# ct.plot()
+# plot.legend()
+# plot.show()
