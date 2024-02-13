@@ -3,35 +3,27 @@ import pandas as pd
 import matplotlib.pyplot as plot
 import seaborn as sns
 
-data = pd.read_csv('datasets/car_sales.csv')
+data = pd.read_csv('datasets/CarPrice_Assignment.csv')
 
-vehicle_types = {
-    "Passenger" : 1,
-    "Car" : 2
-}
-    
-
-print(data)
+print(data.head())
+print(data.shape)
 print(data.info())
-print(data.isna())
-print(data["Vehicle_type"].unique())
+string_columns = data.columns[data.dtypes == "object"]
 
-data["Vehicle_type"] = data["Vehicle_type"].apply(lambda x: vehicle_types[x] )
+for column in string_columns:
+    print("Unique values for " + column)
+    print(data[column].unique())
+    print("=======================")
 
+print(data.describe())
 
-# plot.figure(figsize=(8, 5))
-# sns.heatmap(data.corr())
-# plot.legend()
-# plot.show()
+data["CompanyName"] = data["CarName"].apply(lambda x: x.split(' ')[0])
+data.drop(columns=['car_ID', 'CarName'], inplace=True)
 
-# ax = sns.barplot(data=data, x="Power_perf_factor", y="Price_in_thousands")
-# ax.set_ylabel("Price in thousands($)")
-# ax.set_xlabel("Power performance factor")
-# plot.legend()
-# plot.show()
+print(data.info())
 
-# ax = sns.barplot(data=data, x="Horsepower", y="Price_in_thousands")
-# ax.set_ylabel("Price in thousands($)")
-# ax.set_xlabel("Horsepower")
-# plot.legend()
-# plot.show()
+string_columns = data.columns[data.dtypes == "object"]
+for column in string_columns:
+    print("Unique values for " + column)
+    print(data[column].unique())
+    print("=======================")
