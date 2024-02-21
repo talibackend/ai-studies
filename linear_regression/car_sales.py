@@ -34,7 +34,7 @@ data.drop(columns=['car_ID', 'CarName'], inplace=True)
 print(data.info())
 print(helper.printAllStringColumns(data))
 
-plot.figure(figsize=(15, 7))
+# plot.figure(figsize=(20, 7))
 
 # plot.subplot(1, 2, 1)
 # sns.distplot(data.price)
@@ -54,4 +54,72 @@ plot.figure(figsize=(15, 7))
 # ax = data["carbody"].value_counts().plot(kind='bar')
 # plot.title('Car Type')
 
-plot.show()
+# plot.subplot(1, 2, 1)
+# sns.countplot(x=data.symboling)
+# plot.title("Symboling Histogram")
+
+# plot.subplot(1, 2, 2)
+# sns.boxplot(x=data.symboling, y=data.price)
+# plot.title("Symboling Box Plot")
+
+# plot.subplot(1, 2, 1)
+# sns.countplot(x=data.enginetype)
+# plot.title("Engine Type Distribution")
+
+# plot.subplot(1, 2, 2)
+# ax = sns.boxplot(x=data.enginetype, y=data.price)
+# plot.title("Engine Type Boxplot")
+
+enginetype_df = pd.DataFrame(data.groupby(['enginetype'])['price'].mean().sort_values(ascending=False))
+companyname_df = pd.DataFrame(data.groupby(['CompanyName'])['price'].mean().sort_values(ascending=False))
+fueltype_df = pd.DataFrame(data.groupby(['fuelsystem'])['price'].mean().sort_values(ascending=False))
+cartype_df = pd.DataFrame(data.groupby(['carbody'])['price'].mean().sort_values(ascending=False))
+
+# print(enginetype_df)
+# print(enginetype_df['price'][0])
+
+# plot.subplot(1, 4, 1)
+# sns.barplot(x=data.enginetype.unique(), y=enginetype_df.price)
+# plot.legend()
+
+# plot.subplot(1, 3, 1)
+# sns.barplot(x=data.CompanyName.unique(), y=companyname_df.price)
+# plot.legend()
+
+# plot.subplot(1, 3, 2)
+# sns.barplot(x=data.fuelsystem.unique(), y=fueltype_df.price)
+# plot.legend()
+
+# plot.subplot(1, 3, 3)
+# sns.barplot(x=data.carbody.unique(), y=cartype_df.price)
+# plot.legend()
+
+# plot.figure(figsize=(8, 7))
+# ax = sns.scatterplot(data=data, x="price", y="carlength")
+# ax.set_title("Price VS Car Length")
+# ax.set_ylabel("Car Length")
+# ax.set_xlabel("Car Length")
+
+# plot.show()
+
+data['fueleconomy'] = (0.55 * data['citympg']) + (0.45 * data['highwaympg'])
+print(data)
+
+required_fields = [
+    'price', 'fueltype', 'aspiration', 'carbody', 'drivewheel', 'wheelbase', 'curbweight',
+    'enginetype', 'cylindernumber', 'enginesize', 'boreratio', 'horsepower', 'fueleconomy',
+    'carlength', 'carwidth'
+]
+
+clean_data = data[required_fields]
+print(helper.printAllStringColumns(clean_data))
+
+normalized_data = helper.normalizeStringFields(clean_data)
+print(normalized_data)
+
+# print(clean_data.corr())
+
+# plot.figure(figsize=(10, 5))
+# sns.pairplot(clean_data)
+# sns.heatmap(clean_data.corr())
+# plot.show()
