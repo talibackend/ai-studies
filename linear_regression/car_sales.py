@@ -114,12 +114,11 @@ required_fields = [
 clean_data = data[required_fields]
 print(helper.printAllStringColumns(clean_data))
 
-normalized_data = helper.normalizeStringFields(clean_data)
-print(normalized_data)
+clean_data = helper.normalizeStringFields(clean_data)
 
 # print(clean_data.corr())
-
-# plot.figure(figsize=(10, 5))
+print(helper.printCorrelations(clean_data))
+# plot.figure(figsize=(10, 7))
 # sns.pairplot(clean_data)
 # sns.heatmap(clean_data.corr())
 # plot.show()
