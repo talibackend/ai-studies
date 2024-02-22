@@ -2,6 +2,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plot
 import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.feature_selection import RFE
+from sklearn.linear_model import LinearRegression
+import statsmodels.api as sm
+from statsmodels.stats.outliers_influence import varaince_inflation_factor
 import helper
 
 data = pd.read_csv('datasets/CarPrice_Assignment.csv')
@@ -111,14 +117,28 @@ required_fields = [
     'carlength', 'carwidth'
 ]
 
-clean_data = data[required_fields]
+clean_data = data
 print(helper.printAllStringColumns(clean_data))
 
-clean_data = helper.normalizeStringFields(clean_data)
-
-# print(clean_data.corr())
+clean_data = helper.normalizeCategoryFields(clean_data, ['doornumber', 'enginelocation', 'fuelsystem', 'CompanyName', 'fueltype', 'aspiration', 'carbody', 'drivewheel', 'enginetype', 'cylindernumber'])
+print(clean_data)
+print(clean_data.info())
+print(clean_data.shape)
 print(helper.printCorrelations(clean_data))
-# plot.figure(figsize=(10, 7))
-# sns.pairplot(clean_data)
-# sns.heatmap(clean_data.corr())
-# plot.show()
+
+
+train_data, test_data = train_test_split(clean_data, train_size=0.7, test_size=0.3, random_state=100)
+
+print("Train data count {}".format(train_data.shape[0]))
+print("Test data count {}".format(test_data.shape[0]))
+
+columns = clean_data.columns
+
+scaler = MinMaxScaler()
+train_data[columns] = scaler.fit_transform(train_data)
+
+print(train_data)
+
+y_train = train_data['price']
+train_data.drop('price', inplace=True)
+x_train = train_data

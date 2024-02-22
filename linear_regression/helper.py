@@ -25,15 +25,34 @@ def normalizeStringFields(df):
     print("==>")
     return df
 
+def normalizeCategoryFields(df, columns):
+    for column in columns:
+        values = df[column].unique()
+        for i in range(len(values)):
+            value = values[i]
+            column_name = "{}_{}".format(column, value)
+            df[column_name] = (df[column] == value)
+        
+        df.drop(column, axis=1, inplace=True)
+    
+    return df
+
 def printCorrelations(df, min=0.8):
     cor = df.corr()
     columns = cor.columns
-
+    correlated_field = set()
     for column in columns:
         each_cor = cor[column].to_dict()
         keys = each_cor.keys()
         
         for key in keys:
-            value = each_cor[key]
+            value = abs(each_cor[key])
             if key != column and value >= min:
+                correlated_field.add(column)
+                correlated_field.add(key)
                 print("Correlation between {} and {} is {}".format(column, key, value))
+    
+    return correlated_field
+
+def getVIF(df, x, y):
+    print(x, y)
