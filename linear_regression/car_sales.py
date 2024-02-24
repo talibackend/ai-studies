@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
 import statsmodels.api as sm
 import helper
 
@@ -34,7 +35,7 @@ print(helper.printAllStringColumns(data))
 print(data.describe())
 
 data["CompanyName"] = data["CarName"].apply(lambda x: correct_company_name(x.split(' ')[0]))
-data.drop(columns=['car_ID', 'CarName'], inplace=True)
+data.drop(columns=['CarName'], inplace=True)
 
 print(data.info())
 print(helper.printAllStringColumns(data))
@@ -116,15 +117,16 @@ required_fields = [
     'carlength', 'carwidth'
 ]
 
-# clean_data = data[required_fields]
-clean_data = data.drop(columns=[
-    'symboling', 'carlength', 'compressionratio', 'horsepower', 'citympg', 'highwaympg', 'fueleconomy', 'doornumber',
-    'fuelsystem', 'CompanyName', 'fueltype', 'carbody', 'drivewheel', 'wheelbase', 'carheight', 'curbweight', 'enginetype'
-])
+clean_data = data[required_fields]
+# clean_data = data
+# clean_data = data.drop(columns=[
+#     'symboling', 'carlength', 'compressionratio', 'horsepower', 'citympg', 'highwaympg', 'fueleconomy', 'doornumber',
+#     'fuelsystem', 'CompanyName', 'fueltype', 'carbody', 'drivewheel', 'wheelbase', 'carheight', 'curbweight', 'enginetype'
+# ])
 print(helper.printAllStringColumns(clean_data))
 
-# clean_data = helper.normalizeCategoryFields(clean_data, ['fueltype', 'aspiration', 'carbody', 'drivewheel', 'enginetype', 'cylindernumber'])
-clean_data = helper.normalizeCategoryFields(clean_data, ['enginelocation', 'aspiration', 'cylindernumber'])
+clean_data = helper.normalizeCategoryFields(clean_data, ['fueltype', 'aspiration', 'carbody', 'drivewheel', 'enginetype', 'cylindernumber'])
+# clean_data = helper.normalizeCategoryFields(clean_data, ['aspiration', 'doornumber', 'fueltype', 'enginelocation', 'cylindernumber', 'carbody', 'drivewheel', 'fuelsystem', 'CompanyName', 'enginetype'])
 print(clean_data)
 print(clean_data.info())
 print(clean_data.shape)
@@ -163,9 +165,13 @@ drop_via_vif = ['enginesize', 'boreratio']
 x_train.drop(drop_via_vif, axis=1, inplace=True)
 model_after_vif = helper.buildModel(x_train, y_train)
 
-initial_data = data
-initial_data = helper.normalizeCategoryFields(initial_data, ['fueltype', 'aspiration', 'carbody', 'drivewheel', 'enginetype', 'cylindernumber', 'doornumber', 'enginelocation', 'fuelsystem', 'CompanyName'])
+# initial_data = data
+# columns = ['wheelbase', 'carheight', 'stroke', 'curbweight', 'enginesize', 'boreratio', 'horsepower','fueleconomy','carlength','carwidth','price']
+# initial_data = pd.DataFrame(data[columns], columns=columns)
+initial_data = clean_data
+# initial_data = helper.normalizeCategoryFields(initial_data)
 
+np.random.seed(0)
 train_data, test_data = train_test_split(initial_data, train_size=0.7, test_size=0.3, random_state=100)
 columns = train_data.columns
 train_data[columns] = scaler.fit_transform(train_data)
@@ -189,12 +195,46 @@ for each in evaluation:
 
 print(len(evaluation))
 
-x_train = x_train[x_train.columns[model_rfe.support_]]
+# x_train = x_train[x_train.columns[model_rfe.support_]]
 
 model_after_rfe = helper.buildModel(x_train, y_train)
 
 helper.getVIF(x_train)
 
 # This is better
+
+x_train = sm.add_constant(x_train)
+y_train_price = model_after_rfe.predict(x_train)
+
+test_data = pd.DataFrame(scaler.fit_transform(test_data[columns]), columns=columns)
+y_test = test_data['price']
+test_data.drop('price', axis=1, inplace=True)
+x_test = test_data
+# x_test = x_test[x_test.columns[model_rfe.support_]]
+
+x_test = sm.add_constant(x_test)
+y_test_price = model_after_rfe.predict(x_test)
+
+test_dff = pd.DataFrame({ "actual" : y_test, "predicted" : y_test_price })
+test_dff["difference"] = test_dff["actual"] - test_dff["predicted"]
+
+print(test_dff.to_markdown())
+print("Prediction Train R2 {}".format(r2_score(y_train, y_train_price)))
+print("Prediction Test R2 {}".format(r2_score(y_test, y_test_price)))
+
+# plot.figure(figsize=(8, 6))
+ax = sns.displot((y_train - y_train_price), bins=20)
+ax.set_titles("Error Term")
+ax.set_ylabels("Density")
+ax.set_xlabels("Predicted - Actual")
+
+ax = sns.displot((y_test - y_test_price), bins=20)
+ax.set_titles("Error Term")
+ax.set_ylabels("Density")
+ax.set_xlabels("Predicted - Actual")
+
+plot.show()
+
+
 
 
