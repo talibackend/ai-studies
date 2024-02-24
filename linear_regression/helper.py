@@ -1,3 +1,7 @@
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+import pandas as pd
+import statsmodels.api as sm 
+
 def printAllStringColumns(df):
     string_columns = df.columns[df.dtypes == "object"]
     print(string_columns)
@@ -54,5 +58,17 @@ def printCorrelations(df, min=0.8):
     
     return correlated_field
 
-def getVIF(df, x, y):
-    print(x, y)
+def getVIF(df):
+    vif = pd.DataFrame()
+    vif["Features"] = df.columns
+    vif["VIF"] = [variance_inflation_factor(df.values, i) for i in range(df.shape[1])]
+    vif["VIF"] = round(vif['VIF'], 2)
+    vif = vif.sort_values(by="VIF", ascending=False)
+    print(vif)
+    return vif
+
+def buildModel(x, y):
+    x = sm.add_constant(x)
+    lm = sm.OLS(y, x).fit()
+    print(lm.summary())
+    return lm

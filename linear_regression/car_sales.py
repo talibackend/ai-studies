@@ -7,7 +7,6 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import LinearRegression
 import statsmodels.api as sm
-from statsmodels.stats.outliers_influence import varaince_inflation_factor
 import helper
 
 data = pd.read_csv('datasets/CarPrice_Assignment.csv')
@@ -117,10 +116,15 @@ required_fields = [
     'carlength', 'carwidth'
 ]
 
-clean_data = data
+# clean_data = data[required_fields]
+clean_data = data.drop(columns=[
+    'symboling', 'carlength', 'compressionratio', 'horsepower', 'citympg', 'highwaympg', 'fueleconomy', 'doornumber',
+    'fuelsystem', 'CompanyName', 'fueltype', 'carbody', 'drivewheel', 'wheelbase', 'carheight', 'curbweight', 'enginetype'
+])
 print(helper.printAllStringColumns(clean_data))
 
-clean_data = helper.normalizeCategoryFields(clean_data, ['doornumber', 'enginelocation', 'fuelsystem', 'CompanyName', 'fueltype', 'aspiration', 'carbody', 'drivewheel', 'enginetype', 'cylindernumber'])
+# clean_data = helper.normalizeCategoryFields(clean_data, ['fueltype', 'aspiration', 'carbody', 'drivewheel', 'enginetype', 'cylindernumber'])
+clean_data = helper.normalizeCategoryFields(clean_data, ['enginelocation', 'aspiration', 'cylindernumber'])
 print(clean_data)
 print(clean_data.info())
 print(clean_data.shape)
@@ -140,5 +144,57 @@ train_data[columns] = scaler.fit_transform(train_data)
 print(train_data)
 
 y_train = train_data['price']
-train_data.drop('price', inplace=True)
+train_data.drop('price', axis=1, inplace=True)
 x_train = train_data
+x_vif = helper.getVIF(x_train)
+
+print(x_vif)
+
+model_after_null_hypothesis = helper.buildModel(x_train, y_train)
+
+# null_hypothesis_slim_fails = ['aspiration_turbo', 'aspiration_std', 'cylindernumber_four', 'cylindernumber_six', 'cylindernumber_five', 'cylindernumber_eight' ]
+
+# x_train.drop(columns=null_hypothesis_slim_fails, axis=1, inplace=True)
+
+# model = helper.buildModel(x_train, y_train)
+
+helper.getVIF(train_data)
+drop_via_vif = ['enginesize', 'boreratio']
+x_train.drop(drop_via_vif, axis=1, inplace=True)
+model_after_vif = helper.buildModel(x_train, y_train)
+
+initial_data = data
+initial_data = helper.normalizeCategoryFields(initial_data, ['fueltype', 'aspiration', 'carbody', 'drivewheel', 'enginetype', 'cylindernumber', 'doornumber', 'enginelocation', 'fuelsystem', 'CompanyName'])
+
+train_data, test_data = train_test_split(initial_data, train_size=0.7, test_size=0.3, random_state=100)
+columns = train_data.columns
+train_data[columns] = scaler.fit_transform(train_data)
+
+y_train = train_data['price']
+train_data.drop('price', axis=1, inplace=True)
+x_train = train_data
+
+lm = LinearRegression()
+lm.fit(x_train, y_train)
+
+model_rfe = RFE(lm)
+model_rfe = model_rfe.fit(x_train, y_train)
+
+evaluation = list(zip(x_train.columns, model_rfe.support_, model_rfe.ranking_))
+
+print(len(columns))
+
+for each in evaluation:
+    print(each)
+
+print(len(evaluation))
+
+x_train = x_train[x_train.columns[model_rfe.support_]]
+
+model_after_rfe = helper.buildModel(x_train, y_train)
+
+helper.getVIF(x_train)
+
+# This is better
+
+
