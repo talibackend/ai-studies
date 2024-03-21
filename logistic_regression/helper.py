@@ -2,8 +2,11 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 import pandas as pd
 import statsmodels.api as sm 
 
-def printAllStringColumns(df):
-    string_columns = df.columns[df.dtypes == "object"]
+def printAllStringColumns(df, dtype="object"):
+    if not dtype:
+        string_columns = df.columns
+    else:
+        string_columns = df.columns[df.dtypes == "object"]
     print(string_columns)
     for column in string_columns:
         print("Unique values for " + column)
@@ -34,7 +37,6 @@ def normalizeCategoryFields(df, columns):
         values = df[column].unique()
         for i in range(len(values)):
             value = values[i]
-            value = value.replace(" ", "_")
             column_name = "{}_{}".format(column, value)
             df[column_name] = (df[column] == value)
         
@@ -54,7 +56,24 @@ def printCorrelations(df, min=0.8):
             value = abs(each_cor[key])
             if key != column and value >= min:
                 correlated_field.add(column)
-                correlated_field.add(key)
+                # correlated_field.add(key)
                 print("Correlation between {} and {} is {}".format(column, key, value))
     
     return correlated_field
+
+def dropHighlyCorrelatedFields(df, threshold=0.8):
+    high_correlations = printCorrelations(df, threshold)
+    cols = df.columns
+    cols_to_drop = []
+
+    for each in high_correlations:
+        print(each)
+    return df
+
+
+def buildModel(x, y):
+    x = sm.add_constant(x)
+    logit = sm.Logit(y, x[x.columns])
+    result = logit.fit()
+    print(result.summary())
+    return logit
