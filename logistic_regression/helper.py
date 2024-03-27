@@ -53,10 +53,11 @@ def printCorrelations(df, min=0.8):
         keys = each_cor.keys()
         
         for key in keys:
+            # value = each_cor[key]
             value = abs(each_cor[key])
             if key != column and value >= min:
-                correlated_field.add(column)
-                # correlated_field.add(key)
+                # correlated_field.add(column)
+                correlated_field.add(key)
                 print("Correlation between {} and {} is {}".format(column, key, value))
     
     return correlated_field
