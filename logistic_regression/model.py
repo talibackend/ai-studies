@@ -302,3 +302,75 @@ metrics_dataset = pd.DataFrame(metrics_dataset, columns=["prob", "accuracy", "se
 
 print(metrics_dataset)
 
+# pyplot.figure(figsize=(8, 6))
+# ax = sn.lineplot(data=metrics_dataset, x="prob", y="accuracy")
+# sn.lineplot(data=metrics_dataset, x="prob", y="sensitivity")
+# sn.lineplot(data=metrics_dataset, x="prob", y="specificity")
+# ax.legend(["Accuracy", "Sensitivity", "Specificity"])
+# pyplot.show()
+
+# Optimal threshold found to be 0.3
+
+prob_df["Final"] = prob_df[0.3]
+# prob_df = prob_df.drop(thresholds, axis=1)
+
+print(prob_df)
+
+cm_after_threshold_selection = sklearn.metrics.confusion_matrix(prob_df["Actual"], prob_df["Final"])
+new_cm_df = pd.DataFrame(cm_after_threshold_selection, columns=["Predicted:0", "Predicted:1"], index=["Actual:0", "Actual:1"])
+
+# pyplot.figure(figsize=(8, 6))
+# ax = sn.heatmap(new_cm_df, annot=True, fmt='d')
+# ax.legend()
+# pyplot.show()
+
+print(prob_df.shape)
+
+print(sklearn.metrics.precision_score(prob_df["Actual"], prob_df["Final"]))
+print(sklearn.metrics.recall_score(prob_df["Actual"], prob_df["Final"]))
+
+precision, recall, pr_thresholds = sklearn.metrics.precision_recall_curve(prob_df["Actual"], prob_df["Probability"])
+
+pr_df = pd.DataFrame(zip(precision, recall, pr_thresholds), columns=["precision", "recall", "threshold"])
+
+# pyplot.figure(figsize=(8, 6))
+# ax = sn.lineplot(x="threshold", y="precision", data=pr_df)
+# sn.lineplot(x="threshold", y="recall", data=pr_df)
+# ax.legend()
+# pyplot.show()
+
+# We will use recall/precision tradeoff threshold, because of the large inbalance in the classes
+
+# prob_df = prob_df.drop(columns=["Final"], axis=1)
+prob_df["Final"] = prob_df[0.4]
+prob_df = prob_df.drop(thresholds, axis=1)
+
+final_confusion_matrix = sklearn.metrics.confusion_matrix(prob_df["Actual"], prob_df["Final"])
+final_cm_df = pd.DataFrame(final_confusion_matrix, columns=["Predicted:0", "Predicted:1"], index=["Actual:0", "Actual:1"])
+print(sklearn.metrics.accuracy_score(prob_df["Actual"], prob_df["Final"]))
+print(sklearn.metrics.precision_score(prob_df["Actual"], prob_df["Final"]))
+print(sklearn.metrics.recall_score(prob_df["Actual"], prob_df["Final"]))
+print(prob_df)
+
+# pyplot.figure(figsize=(8, 6))
+# ax = sn.heatmap(final_cm_df, annot=True, fmt="d")
+# ax.legend()
+# pyplot.show()
+
+print("=======> Prediction <=======")
+new_predictions = model_3.predict_proba(test_data_x)
+new_predictions_df = pd.DataFrame({ "Actual" : test_data_y, "Probability" : new_predictions[:, 1] })
+new_predictions_df["Final"] = new_predictions_df["Probability"].apply(lambda x: 1 if x > 0.42 else 0)
+
+print(new_predictions_df)
+
+predict_confusion_matrix = sklearn.metrics.confusion_matrix(new_predictions_df["Actual"], new_predictions_df["Final"])
+predict_cm_df = pd.DataFrame(predict_confusion_matrix, columns=["Predicted:0", "Predicted:1"], index=["Actual:0", "Actual:1"])
+print(sklearn.metrics.accuracy_score(new_predictions_df["Actual"], new_predictions_df["Final"]))
+print(sklearn.metrics.precision_score(new_predictions_df["Actual"], new_predictions_df["Final"]))
+print(sklearn.metrics.recall_score(new_predictions_df["Actual"], new_predictions_df["Final"]))
+
+pyplot.figure(figsize=(8, 6))
+ax = sn.heatmap(predict_cm_df, annot=True, fmt="d")
+ax.legend()
+pyplot.show()
